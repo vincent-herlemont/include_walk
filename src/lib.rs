@@ -1,9 +1,12 @@
 use std::error::Error;
-use std::ffi::{OsStr, OsString};
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
+
+pub fn walk<P: AsRef<Path>>(path: P) -> WalkPaths {
+    WalkPaths::new(path.as_ref().to_path_buf())
+}
 
 #[derive(Debug)]
 pub struct WalkPaths {
@@ -74,40 +77,29 @@ impl To {
     }
 }
 
-pub fn walk<P: AsRef<Path>>(path: P) -> WalkPaths {
-    WalkPaths::new(path.as_ref().to_path_buf())
-}
-
 fn write(path: PathBuf, stmacro: String, walk_paths: WalkPaths) -> Result<(), Box<dyn Error>> {
     let mut all_the_files = File::create(path)?;
 
-    writeln!(&mut all_the_files, r#"use utils::asset::Asset;"#,)?;
+    writeln!(&mut all_the_files, r#"use std::collections::HashMap;"#,)?;
     writeln!(&mut all_the_files, r#""#,)?;
     writeln!(&mut all_the_files, r#"#[allow(dead_code)]"#,)?;
     writeln!(
         &mut all_the_files,
-        r#"pub fn {}() -> Vec<Asset> {{"#,
+        r#"pub fn {}() -> HashMap<&'static str, &'static str> {{"#,
         walk_paths.method
     )?;
-    writeln!(&mut all_the_files, r#"    vec!["#,)?;
+    writeln!(&mut all_the_files, r#"    let mut out = HashMap::new();"#,)?;
 
     for f in walk_paths.entries {
-        writeln!(&mut all_the_files, r#"        Asset::new("#,)?;
         writeln!(
             &mut all_the_files,
-            r#"            "{name}","#,
-            name = f.path().display()
-        )?;
-        writeln!(
-            &mut all_the_files,
-            r#"            {stmacro}!("{name}"),"#,
+            r#"    out.insert("{path}", {stmacro}!("{path}"));"#,
             stmacro = stmacro,
-            name = f.path().display()
+            path = f.path().display()
         )?;
-        writeln!(&mut all_the_files, r#"        ),"#,)?;
     }
 
-    writeln!(&mut all_the_files, r#"    ]"#,)?;
+    writeln!(&mut all_the_files, r#"    out"#,)?;
     writeln!(&mut all_the_files, r#"}}"#,)?;
 
     Ok(())
