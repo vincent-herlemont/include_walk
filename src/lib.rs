@@ -4,14 +4,20 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
-pub fn walk<P: AsRef<Path>>(path: P) -> WalkPaths {
+pub fn from<P: AsRef<Path>>(path: P) -> WalkPaths {
     WalkPaths::new(path.as_ref().to_path_buf())
+}
+
+#[derive(Debug)]
+pub enum Cast {
+    Str,
+    Bytes,
 }
 
 #[derive(Debug)]
 pub struct WalkPaths {
     entries: Vec<DirEntry>,
-    method: String,
+    cast: Cast,
 }
 
 impl WalkPaths {
@@ -28,7 +34,7 @@ impl WalkPaths {
                     None
                 })
                 .collect(),
-            method: String::from("assets"),
+            cast: Cast::Str,
         }
     }
 
@@ -41,38 +47,26 @@ impl WalkPaths {
             ..self
         }
     }
-    pub fn method<M: AsRef<str>>(self, method: M) -> WalkPaths {
+
+    pub fn bytes(self) -> WalkPaths {
         WalkPaths {
-            method: method.as_ref().to_string(),
+            cast: Cast::Bytes,
             ..self
         }
     }
 
-    pub fn bytes(self) -> To {
-        To::Bytes(self)
+    pub fn str(self) -> WalkPaths {
+        WalkPaths {
+            cast: Cast::Str,
+            ..self
+        }
     }
 
-    pub fn str(self) -> To {
-        To::Str(self)
-    }
-}
-
-#[derive(Debug)]
-pub enum To {
-    Str(WalkPaths),
-    Bytes(WalkPaths),
-}
-
-pub trait ToWalkPaths<T>: Sized {
-    fn new(_: T) -> WalkPaths;
-}
-
-impl To {
     pub fn to<P: AsRef<Path>>(self, path: P) -> Result<(), Box<dyn std::error::Error>> {
         let path = path.as_ref().to_path_buf();
-        match self {
-            To::Str(walk_paths) => write(path, String::from("include_str"), walk_paths),
-            To::Bytes(walk_paths) => write(path, String::from("include_bytes"), walk_paths),
+        match self.cast {
+            Cast::Str => write(path, String::from("include_str"), self),
+            Cast::Bytes => write(path, String::from("include_bytes"), self),
         }
     }
 }
@@ -85,8 +79,7 @@ fn write(path: PathBuf, stmacro: String, walk_paths: WalkPaths) -> Result<(), Bo
     writeln!(&mut all_the_files, r#"#[allow(dead_code)]"#,)?;
     writeln!(
         &mut all_the_files,
-        r#"pub fn {}() -> HashMap<&'static str, &'static str> {{"#,
-        walk_paths.method
+        r#"pub fn getAll() -> HashMap<&'static str, &'static str> {{"#,
     )?;
     writeln!(&mut all_the_files, r#"    let mut out = HashMap::new();"#,)?;
 

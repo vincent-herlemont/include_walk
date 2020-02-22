@@ -2,42 +2,28 @@
 
 [![Rust](https://github.com/vincent-herlemont/include_walk/workflows/Rust/badge.svg)](https://github.com/vincent-herlemont/include_walk/actions/)
 
-Include content files directory recursively using `include_str!` or `include_bytes`.
+Include content files directory recursively using `include_str!` or `include_bytes!`.
 It generate an output rust file with a method that return an [HashMap](https://doc.rust-lang.org/std/collections/struct.HashMap.html)
 
 # Installation
 
-Use `walk` method in your `build.rs` you can customise with :
- - filtered the files (`.filter(|e| -> ..your filter..)`),
- - change the name of get `method` (`.method("get_assets")`)
- - choice the cast : `.str()` or `.bytes()`
- - output path of generated file : `.to("./src/assets.rs")`
+The following example, import recursively all file present in `./src/assets/` and
+generate a file import.
 ```rust
-// ./build.rs
-use include_walk::walk;
-
+// build.rs
 fn main() {
-    // Example
-    walk("./")
-        .filter(|e| e.path().to_string_lossy().contains("assets"))
-        .method("get_assets")
-        .str()
-        .to("./src/assets.rs")
-        .unwrap();
+    include_walk::from("./src/assets/").to("./src/assets.rs");
 }
 ```
 
-output : 
-```rust
-// ./src/assets.rs
-use std::collections::HashMap;
+You can customise many things, here the list of methods.
 
-#[allow(dead_code)]
-pub fn get_assets() -> HashMap<&'static str, &'static str> {
-    let mut out = HashMap::new();
-    out.insert("./src/_assets.rs", include_str!("./src/_assets.rs"));
-    out.insert("./src/assets.rs", include_str!("./src/assets.rs"));
-    out.insert("./src/assets/certificate.yaml", include_str!("./src/assets/certificate.yaml"));
-    out
-}
-```
+# Customise & Methods & Options 
+
+| Methods | Required | Default | Description  |
+| ------- |:--------:|:-------:| ------------|
+| ::from(path) | YES   | - | Specified the directory path to import |
+| .to(path) | YES   | - | The path of generated module. |
+| .filter(&#124;entry&#124; -> bool) | NO   | deactivate | Filter function that take a callback who can provide an `entry` argument and return `bool` : `true` for include and `false` for exclude file. |
+| .bytes() | NO | deactivate | include with `include_bytes!` |
+| .str() | NO | activate | include with `include_str!` |

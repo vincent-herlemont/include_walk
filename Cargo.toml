@@ -1,8 +1,13 @@
 [package]
 name = "include_walk"
+description = "Include directory recursively using include_str! or include_bytes!"
 version = "0.1.0"
 authors = ["Vincent Herlemont <vincentherl@leszeros.com>"]
 edition = "2018"
+license = "Apache-2.0"
+homepage = "https://github.com/vincent-herlemont/include_walk"
+documentation = "https://github.com/vincent-herlemont/include_walk"
+repository = "https://github.com/vincent-herlemont/include_walk"
 
 [dependencies]
 walkdir = "2.3.1"
