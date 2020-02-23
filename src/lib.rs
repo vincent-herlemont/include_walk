@@ -16,6 +16,7 @@ pub enum Cast {
 
 #[derive(Debug)]
 pub struct WalkPaths {
+    entry_path: PathBuf,
     entries: Vec<DirEntry>,
     cast: Cast,
 }
@@ -23,6 +24,7 @@ pub struct WalkPaths {
 impl WalkPaths {
     fn new(path: PathBuf) -> WalkPaths {
         WalkPaths {
+            entry_path: path.to_owned(),
             entries: WalkDir::new(path)
                 .into_iter()
                 .filter_map(|e| {
@@ -72,7 +74,7 @@ impl WalkPaths {
 }
 
 fn write(path: PathBuf, stmacro: String, walk_paths: WalkPaths) -> Result<(), Box<dyn Error>> {
-    let mut all_the_files = File::create(path)?;
+    let mut all_the_files = File::create(&path)?;
 
     writeln!(&mut all_the_files, r#"use std::collections::HashMap;"#,)?;
     writeln!(&mut all_the_files, r#""#,)?;
@@ -84,11 +86,21 @@ fn write(path: PathBuf, stmacro: String, walk_paths: WalkPaths) -> Result<(), Bo
     writeln!(&mut all_the_files, r#"    let mut out = HashMap::new();"#,)?;
 
     for f in walk_paths.entries {
+        let f = f
+            .path()
+            .strip_prefix(
+                path.parent()
+                    // TODO: Fix
+                    .ok_or(".... fail to get parent path  ....")?,
+            )
+            .ok()
+            .map_or(f.path(), |el| el);
+
         writeln!(
             &mut all_the_files,
             r#"    out.insert("{path}", {stmacro}!("{path}"));"#,
             stmacro = stmacro,
-            path = f.path().display()
+            path = f.display()
         )?;
     }
 

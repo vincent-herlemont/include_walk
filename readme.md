@@ -8,18 +8,38 @@ It generate an output rust file with a method that return an [HashMap](https://d
 
 # Installation
 
-The following example, import recursively all file present in `./src/assets/` and
-generate a file import.
+Add `include_walk` to the build-dependencies in `./Cargo.toml`.
+```toml
+[build-dependencies]
+include_walk = "0.1.1"
+```
+
+Create a builder file `./build.rs`. Below, there is a lite example : that import recursively all file present in `./src/assets/` and
+generate a file import `./src/assets.rs`. 
+By defaults, files are imported as `&'static str` using `include_str!`.
 ```rust
-// build.rs
+// ./build.rs
 fn main() {
     include_walk::from("./src/assets/").to("./src/assets.rs");
 }
 ```
 
-You can customise many things, here the list of methods.
+### Use Cases
 
-# Customise & Methods & Options 
+Retrieve all content files. For more detail see your generated file :
+`./src/assets.rs` in that example.
+```rust
+// ./src/main.rs
+mod assets;
+
+fn main() {
+    let assets = assets::getAll();
+    let content = assets.get("assets/relative/path/to/files...").unwrap();
+    println!("{}", content);
+}
+```
+
+# Methods 
 
 | Methods | Required | Default | Description  |
 | ------- |:--------:|:-------:| ------------|
@@ -28,3 +48,6 @@ You can customise many things, here the list of methods.
 | .filter(&#124;entry&#124; -> bool) | NO   | deactivate | Filter function that take a callback who can provide an `entry` argument and return `bool` : `true` for include and `false` for exclude file. |
 | .bytes() | NO | deactivated | include with `include_bytes!` |
 | .str() | NO | activated | include with `include_str!` |
+
+
+

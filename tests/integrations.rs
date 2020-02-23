@@ -66,12 +66,13 @@ edition = "2018"
             .current_dir(&dir.path())
             .output()
             .unwrap();
-        assert!(cmd.status.success());
         let out = String::from_utf8(cmd.stdout)?;
+        println!("{}", out.as_str());
         assert_eq!(
             out.as_str(),
             "c:7\nassert f1:true\nassert f1:content:content f4\n"
         );
+        assert!(cmd.status.success());
     }
 
     Ok(())
