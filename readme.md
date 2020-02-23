@@ -1,5 +1,6 @@
 # include_walk
 
+[![Crate](https://img.shields.io/crates/v/include_walk.svg)](https://crates.io/crates/include_walk)
 [![Rust](https://github.com/vincent-herlemont/include_walk/workflows/Rust/badge.svg)](https://github.com/vincent-herlemont/include_walk/actions/)
 
 Include content files directory recursively using `include_str!` or `include_bytes!`.
@@ -25,5 +26,5 @@ You can customise many things, here the list of methods.
 | ::from(path) | YES   | - | Specified the directory path to import |
 | .to(path) | YES   | - | The path of generated module. |
 | .filter(&#124;entry&#124; -> bool) | NO   | deactivate | Filter function that take a callback who can provide an `entry` argument and return `bool` : `true` for include and `false` for exclude file. |
-| .bytes() | NO | deactivate | include with `include_bytes!` |
-| .str() | NO | activate | include with `include_str!` |
+| .bytes() | NO | deactivated | include with `include_bytes!` |
+| .str() | NO | activated | include with `include_str!` |
