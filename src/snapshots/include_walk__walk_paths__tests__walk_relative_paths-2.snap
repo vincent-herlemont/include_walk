@@ -1,0 +1,10 @@
+---
+source: src/walk_paths.rs
+expression: list_paths
+---
+[
+    "test/test/1",
+    "test/1",
+    "1",
+    "2",
+]

@@ -4,14 +4,13 @@
 [![Rust](https://github.com/vincent-herlemont/include_walk/workflows/Rust/badge.svg)](https://github.com/vincent-herlemont/include_walk/actions/)
 
 Include content files directory recursively using `include_str!` or `include_bytes!`.
-It generate an output rust file with a method that return an [HashMap](https://doc.rust-lang.org/std/collections/struct.HashMap.html)
-
+It generate an output rust file with a method that return an [HashMap](https://doc.rust-lang.org/std/collections/struct.HashMap.html) composed like this : __<path file `&'static str`, content file `&'static str`>__
 # Installation
 
 Add `include_walk` to the build-dependencies in `./Cargo.toml`.
 ```toml
 [build-dependencies]
-include_walk = "0.1.1"
+include_walk = "0.2.0"
 ```
 
 Create a builder file `./build.rs`. Below, there is a lite example : that import recursively all file present in `./src/assets/` and
@@ -45,7 +44,7 @@ fn main() {
 | ------- |:--------:|:-------:| ------------|
 | ::from(path) | YES   | - | Specified the directory path to import |
 | .to(path) | YES   | - | The path of generated module. |
-| .filter(&#124;entry&#124; -> bool) | NO   | deactivate | Filter function that take a callback who can provide an `entry` argument and return `bool` : `true` for include and `false` for exclude file. |
+| .filter(&#124;path_file&#124; -> bool) | NO   | deactivate | Filter function that take a callback who can provide an `path_file` [PathBuf](https://doc.rust-lang.org/std/path/struct.PathBuf.html) argument and return `bool` : `true` for include and `false` for exclude file. |
 | .bytes() | NO | deactivated | include with `include_bytes!` |
 | .str() | NO | activated | include with `include_str!` |
 

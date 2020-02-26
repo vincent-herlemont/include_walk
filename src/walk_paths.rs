@@ -1,20 +1,16 @@
 use crate::write::write;
 use std::path::{Path, PathBuf};
-use walkdir::{DirEntry, WalkDir};
+use walkdir::WalkDir;
 
-pub fn from<P: AsRef<Path>>(path: P) -> WalkPaths {
-    new(path.as_ref().to_path_buf())
-}
-
-pub fn new(path: PathBuf) -> WalkPaths {
+pub fn new<P: AsRef<Path>>(path: P) -> WalkPaths {
     WalkPaths {
-        entry_path: path.to_owned(),
-        entries: WalkDir::new(path)
+        entry_path: path.as_ref().to_owned(),
+        files: WalkDir::new(path)
             .into_iter()
             .filter_map(|e| {
                 if let Ok(dir_entry) = e {
                     if !dir_entry.path().is_dir() {
-                        return Some(dir_entry);
+                        return Some(dir_entry.into_path());
                     }
                 }
                 None
@@ -33,17 +29,17 @@ pub enum Cast {
 #[derive(Debug)]
 pub struct WalkPaths {
     entry_path: PathBuf,
-    entries: Vec<DirEntry>,
+    files: Vec<PathBuf>,
     cast: Cast,
 }
 
 impl WalkPaths {
     pub fn filter<P>(self, predicate: P) -> WalkPaths
     where
-        P: FnMut(&DirEntry) -> bool,
+        P: FnMut(&PathBuf) -> bool,
     {
         WalkPaths {
-            entries: self.entries.into_iter().filter(predicate).collect(),
+            files: self.files.into_iter().filter(predicate).collect(),
             ..self
         }
     }
@@ -62,11 +58,55 @@ impl WalkPaths {
         }
     }
 
-    pub fn to<P: AsRef<Path>>(self, path: P) -> Result<(), Box<dyn std::error::Error>> {
-        let path = path.as_ref().to_path_buf();
+    pub fn to<P: AsRef<Path>>(self, output_path: P) -> Result<(), Box<dyn std::error::Error>> {
+        let output_path = output_path.as_ref().to_path_buf();
+        let files = self.relative_paths(&output_path);
         match self.cast {
-            Cast::Str => write(path, String::from("include_str"), self.entries),
-            Cast::Bytes => write(path, String::from("include_bytes"), self.entries),
+            Cast::Str => write(output_path, String::from("include_str"), files),
+            Cast::Bytes => write(output_path, String::from("include_bytes"), files),
         }
+    }
+
+    fn relative_paths(&self, ref_path: &PathBuf) -> Vec<PathBuf> {
+        if let Some(ref_path) = ref_path.parent() {
+            self.files
+                .iter()
+                .map(|p| -> _ {
+                    p.strip_prefix(ref_path)
+                        .ok()
+                        .map_or(p.to_path_buf(), |p| p.to_path_buf())
+                })
+                .collect()
+        } else {
+            self.files.iter().map(|p| p.to_path_buf()).collect()
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::walk_paths::new;
+    use insta::assert_debug_snapshot;
+    use std::path::PathBuf;
+
+    #[test]
+    fn new_walk_paths() {
+        let walk_path = new("path/test");
+        assert_debug_snapshot!(walk_path);
+    }
+
+    #[test]
+    fn walk_relative_paths() {
+        let mut walk_path = new("");
+        walk_path.files = vec![
+            PathBuf::from("path/test/test/1"),
+            PathBuf::from("path/test/1"),
+            PathBuf::from("path/1"),
+            PathBuf::from("path/2"),
+        ];
+        let list_paths = walk_path.relative_paths(&PathBuf::from("bad/path/output.rs"));
+        assert_debug_snapshot!(list_paths);
+        let list_paths = walk_path.relative_paths(&PathBuf::from("path/output.rs"));
+        assert_debug_snapshot!(list_paths);
     }
 }

@@ -1,0 +1,9 @@
+---
+source: src/walk_paths.rs
+expression: walk_path
+---
+WalkPaths {
+    entry_path: "path/test",
+    files: [],
+    cast: Str,
+}
