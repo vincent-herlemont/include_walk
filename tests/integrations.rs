@@ -27,11 +27,10 @@ fn test() -> Result<(), Box<dyn Error>> {
 fn main() {{
      let a = assets::getAll();
      println!("c:{{}}", a.capacity());
-     println!("assert f1:{{}}", a.contains_key("{p}/d1/d2/f4.txt"));
-     println!("assert f1:content:{{}}", a.get("{p}/d1/d2/f4.txt").unwrap());
+     println!("assert f1:{{}}", a.contains_key("../d1/d2/f4.txt"));
+     println!("assert f1:content:{{}}", a.get("../d1/d2/f4.txt").unwrap());
 }}
-"#,
-            p = &dir.path().to_string_lossy()
+"#
         );
         let cargo_content = r#"[package]
 name = "include_walk_test"

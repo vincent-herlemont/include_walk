@@ -1,0 +1,7 @@
+---
+source: src/walk_paths.rs
+expression: relative_path
+---
+Some(
+    "../p3",
+)

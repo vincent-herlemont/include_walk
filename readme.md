@@ -10,7 +10,7 @@ It generate an output rust file with a method that return an [HashMap](https://d
 Add `include_walk` to the build-dependencies in `./Cargo.toml`.
 ```toml
 [build-dependencies]
-include_walk = "0.2.0"
+include_walk = "0.2.1"
 ```
 
 Create a builder file `./build.rs`. Below, there is a lite example : that import recursively all file present in `./src/assets/` and

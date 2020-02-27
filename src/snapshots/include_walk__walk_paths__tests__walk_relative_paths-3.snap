@@ -1,0 +1,7 @@
+---
+source: src/walk_paths.rs
+expression: list_paths
+---
+[
+    "../test1/test2",
+]
