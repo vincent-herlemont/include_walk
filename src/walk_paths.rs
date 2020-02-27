@@ -77,14 +77,10 @@ impl WalkPaths {
     }
 
     fn relative_paths(&self, ref_path: &PathBuf) -> Vec<PathBuf> {
-        if let Some(ref_path_dir) = ref_path.parent() {
-            self.files
-                .iter()
-                .map(|p| WalkPaths::relative_path(ref_path, p).map_or(p.to_path_buf(), |p| p))
-                .collect()
-        } else {
-            self.files.to_owned()
-        }
+        self.files
+            .iter()
+            .map(|p| WalkPaths::relative_path(ref_path, p).map_or(p.to_path_buf(), |p| p))
+            .collect()
     }
 
     /// Return relative path between to path.
