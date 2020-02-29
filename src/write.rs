@@ -11,7 +11,7 @@ pub fn write(path: PathBuf, stmacro: String, entries: Vec<PathBuf>) -> Result<()
     writeln!(&mut all_the_files, r#"#[allow(dead_code)]"#,)?;
     writeln!(
         &mut all_the_files,
-        r#"pub fn getAll() -> HashMap<&'static str, &'static str> {{"#,
+        r#"pub fn get_all() -> HashMap<&'static str, &'static str> {{"#,
     )?;
     writeln!(&mut all_the_files, r#"    let mut out = HashMap::new();"#,)?;
 

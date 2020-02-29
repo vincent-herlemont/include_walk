@@ -25,7 +25,7 @@ fn test() -> Result<(), Box<dyn Error>> {
         let main_content = format!(
             r#"mod assets;
 fn main() {{
-     let a = assets::getAll();
+     let a = assets::get_all();
      println!("c:{{}}", a.capacity());
      println!("assert f1:{{}}", a.contains_key("../d1/d2/f4.txt"));
      println!("assert f1:content:{{}}", a.get("../d1/d2/f4.txt").unwrap());

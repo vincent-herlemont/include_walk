@@ -10,7 +10,7 @@ It generate an output rust file with a method that return an [HashMap](https://d
 Add `include_walk` to the build-dependencies in `./Cargo.toml`.
 ```toml
 [build-dependencies]
-include_walk = "0.2.2"
+include_walk = "0.3.0"
 ```
 
 Create a builder file `./build.rs`. Below, there is a lite example : that import recursively all file present in `./src/assets/` and
@@ -26,13 +26,13 @@ fn main() {
 ### Use Cases
 
 Retrieve all content files. For more detail see your generated file :
-`./src/assets.rs` in that example.
+`./src/assets.rs` in that example. So include module `assets` as the following example.
 ```rust
 // ./src/main.rs
 mod assets;
 
 fn main() {
-    let assets = assets::getAll();
+    let assets = assets::get_all();
     let content = assets.get("assets/relative/path/to/files...").unwrap();
     println!("{}", content);
 }
